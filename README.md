@@ -208,7 +208,7 @@ Work through the files in this order:
 
 ---
 
-## Key Concepts You'll Encounter
+## Key Concepts Encountered
 
 | Concept | Where You'll Use It |
 |---|---|
@@ -227,23 +227,3 @@ Work through the files in this order:
 
 ---
 
-## Troubleshooting
-
-**`N8N_WEBHOOK_URL is not set in .env`**
-Make sure you copied `.env.example` to `.env` (not `.env.example`) and filled in the URL.
-
-**n8n returns no response / Express times out**
-Make sure your n8n workflow has a "Respond to Webhook" node connected at the end.
-Also confirm the workflow is open and listening (Test URL) or activated (Production URL).
-
-**Python script not found**
-Make sure `python3` is in your PATH: `which python3`
-On Windows you may need `python` instead of `python3` in runner.js.
-
-**yfinance returns no data**
-Check that the ticker symbol is valid (e.g. AAPL not Apple).
-Canadian stocks need an exchange suffix: `AC.TO` for Air Canada on TSX.
-
-**Groq errors inside n8n**
-Check your Groq API key in n8n Settings → Credentials.
-Make sure the credential is connected to the AI Agent node.
