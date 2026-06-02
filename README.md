@@ -1,229 +1,132 @@
-# Stock Analyzer
-
-ML-powered stock price analysis with an n8n-hosted Groq AI agent.
-Built with Python (scikit-learn), Node.js (Express), and a vanilla JS frontend.
-The agentic workflow — Groq LLM reasoning, news fetching, prompt logic — lives
-entirely inside n8n. Express just sends data to it and waits for the summary.
-
+Stock Analyzer
+ML stock analysis pipeline combining a linear regression price prediction model with a RAG-style Groq LLaMA 3.3 agent, orchestrated through n8n and served via a Node.js/Express backend.
 ---
-
-## How It All Fits Together
-
+What It Does
+Enter a stock ticker and the app:
+Fetches 6 months of historical OHLCV data via yfinance
+Engineers features (moving averages, lagged prices, volatility, volume) and trains a linear regression model
+Predicts the next trading day's closing price and evaluates model confidence (R², MAE)
+Sends the ML result to an n8n workflow where a Groq LLaMA 3.3 agent cross-references it against real-time data from 4 external sources
+Returns a structured verdict (PLAUSIBLE / UNLIKELY / HIGH RISK) with evidence and a disclaimer
+---
+Architecture
 ```
-Browser
-  │
-  │  POST /api/analyze  { ticker: "AAPL" }
-  ▼
-Express (server.js)
-  │
-  │  spawns child process
-  ▼
-Python predict.py  →  returns ML result JSON
-  │
-  │  POST to n8n webhook URL
-  ▼
+Browser (vanilla JS + Chart.js)
+        ↓  POST /api/analyze
+Express (Node.js)
+        ↓  child_process
+Python predict.py  →  linear regression result (JSON)
+        ↓  POST to webhook
 n8n Workflow
-  ├── AI Agent node (Groq via n8n credentials)
-  │     └── Tool: HTTP Request → NewsAPI headlines
-  │
-  └── Respond to Webhook  →  { "summary": "..." }
-  │
-  │  summary string returned to Express
-  ▼
-Express sends  { ml: {...}, summary: "..." }  to browser
-  │
-  ▼
-Browser renders chart + metrics + AI summary
+  ├── Code node  →  fetches NewsAPI, Finnhub, Alpha Vantage, SEC-API in parallel
+  └── AI Agent   →  Groq LLaMA 3.3 reasons over all data
+        ↓  Respond to Webhook
+Express  →  { ml, summary }  →  Browser
 ```
-
 ---
-
-## Project Structure
-
+Tech Stack
+Layer	Technology
+ML model	Python · scikit-learn · yfinance · pandas
+Backend	Node.js · Express
+Agent orchestration	n8n (self-hosted)
+LLM	Groq · LLaMA 3.3 70B Versatile
+Data sources	NewsAPI · Finnhub · Alpha Vantage · SEC-API
+Frontend	Vanilla JS · Chart.js · Inter font
+---
+Project Structure
 ```
 stock-analyzer/
-├── server.js               ← Express app entry point
-├── package.json            ← Node.js dependencies
-├── .env.example            ← Copy to .env and fill in values
+├── server.js                 ← Express entry point
+├── package.json
+├── .env.example              ← copy to .env and fill in keys
 │
 ├── routes/
-│   └── analyze.js          ← POST /api/analyze — coordinates ML + n8n
+│   └── analyze.js            ← POST /api/analyze route handler
 │
 ├── agent/
-│   └── n8nClient.js        ← Sends ML results to n8n, returns summary
+│   └── n8nClient.js          ← sends ML result to n8n webhook
 │
 ├── ml/
-│   ├── predict.py          ← Python linear regression model
-│   ├── runner.js           ← Node.js spawns predict.py as child process
-│   └── requirements.txt    ← Python dependencies
+│   ├── predict.py            ← linear regression model
+│   ├── runner.js             ← spawns predict.py as child process
+│   └── requirements.txt      ← Python dependencies
 │
-└── public/
-    └── index.html          ← Frontend UI (HTML + CSS + JS)
+├── public/
+│   └── index.html            ← frontend UI
+│
+└── tests/
+    ├── js/
+    │   ├── runner.test.js    ← Jest tests for Node/Python bridge
+    │   └── analyze.test.js   ← Jest tests for Express route
+    └── python/
+        └── test_predict.py   ← pytest tests for ML pipeline
 ```
-
 ---
-
-## Setup Instructions
-
-### 1. Install Node.js dependencies
+Setup
+1. Clone the repo
+```bash
+git clone https://github.com/YOUR_USERNAME/stock-analyzer.git
+cd stock-analyzer
+```
+2. Install Node.js dependencies
 ```bash
 npm install
 ```
-
-### 2. Install Python dependencies
+3. Install Python dependencies
 ```bash
 pip install -r ml/requirements.txt
 ```
-
-### 3. Set up your environment variables
+4. Configure environment variables
 ```bash
 cp .env.example .env
 ```
-Then open `.env` and fill in your `N8N_WEBHOOK_URL` (see n8n setup below).
-
-### 4. Set up your n8n workflow (see section below)
-
-### 5. Run the app
-```bash
-npm start
+Fill in `.env`:
 ```
-For auto-restart during development:
+PORT=3000
+N8N_WEBHOOK_URL=http://localhost:5678/webhook-test/stock-analysis
+```
+5. Set up n8n (self-hosted via Docker)
+```bash
+docker run -it --rm --name n8n -p 5678:5678 n8nio/n8n
+```
+Build the workflow in n8n:
+Webhook node → POST, path: `stock-analysis`, response mode: `Using Respond to Webhook node`
+Code node → fetches NewsAPI, Finnhub, Alpha Vantage, SEC-API in parallel and builds the agent prompt
+AI Agent node → Groq LLaMA 3.3 70B, Conversation Agent, no tools
+Respond to Webhook node → returns `{ "summary": "..." }`
+6. Run the app
 ```bash
 npm run dev
 ```
-
-Then visit: **http://localhost:3000**
-
+Visit: http://localhost:3000
 ---
-
-## n8n Workflow Setup
-
-This is where your Groq agent lives. Build it visually in n8n:
-
-### Step 1 — Create a new workflow in n8n
-
-### Step 2 — Add a Webhook node
-- Method: `POST`
-- Path: `stock-analysis` (or any name you like)
-- Response mode: `Using Respond to Webhook node` ← critical setting
-- Copy the **Test URL** and paste it into your `.env` as `N8N_WEBHOOK_URL`
-
-### Step 3 — Add an AI Agent node
-- Connect it to the Webhook node
-- Model: Select Groq as the provider, choose `llama-3.3-70b-versatile`
-  (you'll need to add Groq credentials in n8n Settings → Credentials)
-- System prompt — example to get you started:
-  ```
-  You are a financial analysis assistant. You receive stock prediction
-  data from a linear regression ML model. Interpret the results clearly,
-  explain what the confidence metrics mean, and always remind the user
-  this is not financial advice.
-  ```
-- User prompt — reference the incoming webhook data using n8n expressions:
-  ```
-  Analyze this stock prediction:
-  Ticker: {{ $json.ticker }}
-  Current price:   ${{ $json.ml.current_price }}
-  Predicted price: ${{ $json.ml.predicted_price }}
-  Model MAE:       {{ $json.ml.mae }}
-  Model R² score:  {{ $json.ml.r2 }}
-  ```
-- CONCEPT TO LEARN: {{ $json.fieldName }} is n8n's expression syntax.
-  It references data from the previous node in the workflow.
-  $json refers to the JSON body of the incoming data.
-
-### Step 4 — (Optional) Add a news tool to the AI Agent
-- Inside the AI Agent node, add a Tool: HTTP Request
-- URL: `https://newsapi.org/v2/everything?q={{ $json.ticker }} stock&pageSize=5&apiKey=YOUR_KEY`
-- The agent will automatically decide when to call this tool for context
-- Store your NewsAPI key in n8n's credential store, not hardcoded in the URL
-
-### Step 5 — Add a Respond to Webhook node
-- Connect it after the AI Agent node
-- Response body — return the agent's output as JSON:
-  ```json
-  {
-    "summary": "{{ $json.output }}"
-  }
-  ```
-- CONCEPT TO LEARN: This node is what sends the HTTP response back to
-  your Express app (n8nClient.js is awaiting it). Without this node,
-  your Express server will hang until the 30-second timeout fires.
-
-### Step 6 — Test the workflow
-- Click "Listen for test event" in n8n
-- Run your app and analyze a ticker
-- Watch the data flow through each node in real time in n8n's editor
-
-### Step 7 — Activate for production
-- Toggle the workflow to **Active** (top-right in n8n editor)
-- Switch your `.env` `N8N_WEBHOOK_URL` to the Production URL
-- Production URL works even when the n8n editor is closed
-
+Running Tests
+JavaScript (Jest):
+```bash
+npm test
+```
+Python (pytest):
+```bash
+pytest tests/python
+```
+All tests use mocks — no API tokens are consumed during testing.
 ---
-
-## Implementation Order (Recommended)
-
-Work through the files in this order:
-
-### Phase 1 — The ML Model (Pure Python)
-**File: `ml/predict.py`**
-- Get this working first by running it directly:
-  ```bash
-  python3 ml/predict.py AAPL
-  ```
-- It should print a JSON object to the terminal — that's your success signal
-- This is the most educational part — take your time here
-
-### Phase 2 — The Node/Python Bridge
-**File: `ml/runner.js`**
-- Connect Node.js to your working Python script via child_process
-- Test it with a small standalone script before wiring it to Express
-
-### Phase 3 — The Express Server
-**Files: `server.js` and `routes/analyze.js`**
-- Get the API endpoint running and test with curl:
-  ```bash
-  curl -X POST http://localhost:3000/api/analyze \
-    -H "Content-Type: application/json" \
-    -d '{"ticker": "AAPL"}'
-  ```
-- At this point, comment out the callN8nAgent step and just return mlResult
-  so you can verify the ML pipeline works end-to-end first
-
-### Phase 4 — The n8n Workflow
-- Build the workflow in n8n following the steps above
-- Use n8n's built-in test panel to send a sample payload and check the output
-- Once working, uncomment callN8nAgent in analyze.js and wire it up
-
-### Phase 5 — n8nClient.js
-**File: `agent/n8nClient.js`**
-- Implement the axios POST to your webhook URL
-- This is a short file — the complexity lives in n8n, not here
-
-### Phase 6 — The Frontend
-**File: `public/index.html`**
-- Wire up the JavaScript to call your API and render the results
-- The Chart.js chart is the most involved part here
-
+n8n Agent Logic
+The agent receives pre-fetched data from 4 sources and evaluates the ML prediction sequentially:
+SEC-API — checks for bankruptcy or legal collapse in recent 8-K filings
+Alpha Vantage — checks P/E ratio and profit margins against the growth prediction
+Finnhub — evaluates market sentiment and current quote data
+NewsAPI — scans recent English-language headlines for adverse events
+If any source triggers a critical signal the agent stops early and reports the risk. Otherwise it synthesizes all evidence into a final Plausibility Rating (High / Medium / Low).
 ---
+Key ML Concepts Used
+Concept	Where
+Supervised learning	Linear regression on closing price
+Feature engineering	MA5, MA20, Lag1-3, volatility, volume MA
 
-## Key Concepts Encountered
-
-| Concept | Where You'll Use It |
-|---|---|
-| Supervised learning | predict.py — training the model |
-| Feature engineering | predict.py — MA, lag, volatility columns |
-| Train/test split | predict.py — evaluating on unseen data |
-| MAE and R² metrics | predict.py — measuring model performance |
-| Child processes | runner.js — Node spawning Python |
-| Async/await | routes/analyze.js, n8nClient.js |
-| REST APIs + HTTP methods | routes/analyze.js |
-| Webhook request/response | n8nClient.js + n8n Webhook node |
-| n8n expression syntax | n8n workflow — {{ $json.field }} |
-| Prompt engineering | n8n AI Agent node — writing the system/user prompt |
-| DOM manipulation | public/index.html — updating the UI |
-| fetch() API | public/index.html — calling your Express server |
-
+Time-series train/test split	`shuffle=False` to prevent data leakage
+MAE + R² evaluation	Model confidence metrics shown in UI
+RAG-style LLM grounding	Real-time data injected into agent prompt
 ---
-
+Disclaimer
+This tool is for educational purposes only. All predictions and AI-generated analysis are not financial advice. Always consult a qualified financial advisor before making investment decisions.
