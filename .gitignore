@@ -1,6 +1,3 @@
-# Never commit these to git
-
-# Environment variables (contains API keys!)
 .env
 
 # Node.js installed packages
