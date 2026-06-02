@@ -1,4 +1,4 @@
-// ml/runner.js — Python Script Executor
+// ml/runner.js (Python Script Executor)
 
 // Node.js can't run Python directly, but it can spawn a Python process as a "child process"
 // a separate program running alongside Node
@@ -19,7 +19,6 @@ async function runPythonModel(ticker) {
         // Build the path to your Python script
         const scriptPath = path.join(__dirname, 'predict.py')
 
-
         // Spawn a Python process
         const process = spawn('python', [scriptPath, ticker])
         // The second argument is an array of command-line args passed to Python
@@ -27,7 +26,6 @@ async function runPythonModel(ticker) {
         // In predict.py, sys.argv[1] --> ticker
         // spawn() is non-blocking — Node doesn't freeze while Python runs
         // Instead, it emits events when data arrives
-
 
         // Collect stdout data (Python's printed output)
         let output = ''
@@ -46,12 +44,12 @@ async function runPythonModel(ticker) {
 
             // Exit code 0 = success. Anything else = error.
             if (code !== 0) {
-                reject(new Error(errorOutput))  // Fixed: removed space after reject
+                reject(new Error(errorOutput)) 
             } else {
                 try {
                     resolve(JSON.parse(output)) // JSON.parse() converts a JSON string into a JavaScript object
                 } catch (e) {
-                    reject(new Error('Failed to parse Python output'))  // Fixed: changed errorMonitor to Error
+                    reject(new Error('Failed to parse Python output')) 
                 }
             }
         })
