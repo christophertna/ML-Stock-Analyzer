@@ -17,7 +17,16 @@ Enter a stock ticker and the app:
 
 ## Architecture
 
-Browser (vanilla JS + Chart.js)↓  POST /api/analyzeExpress (Node.js)↓  child_processPython predict.py  →  linear regression result (JSON)↓  POST to webhookn8n Workflow├── Code node  →  fetches NewsAPI, Finnhub, Alpha Vantage, SEC-API in parallel└── AI Agent   →  Groq LLaMA 3.3 reasons over all data↓  Respond to WebhookExpress  →  { ml, summary }  →  Browser
+Browser (vanilla JS + Chart.js)
+    ↓ 
+POST /api/analyzeExpress (Node.js)
+    ↓  child_process
+Python predict.py  →  linear regression result (JSON)
+    ↓  POST to webhook
+n8n Workflow
+├── Code node  →  fetches NewsAPI, Finnhub, Alpha Vantage, SEC-API in parallel
+└── AI Agent   →  Groq LLaMA 3.3 reasons over all data
+    ↓  Respond to WebhookExpress  →  { ml, summary }  →  Browser
 ---
 
 ## Tech Stack
@@ -35,7 +44,23 @@ Browser (vanilla JS + Chart.js)↓  POST /api/analyzeExpress (Node.js)↓  child
 
 ## Project Structure
 
-stock-analyzer/├── server.js                 ← Express entry point├── package.json├── .env.example              ← copy to .env and fill in keys│├── routes/│   └── analyze.js            ← POST /api/analyze route handler│├── agent/│   └── n8nClient.js          ← sends ML result to n8n webhook│├── ml/│   ├── predict.py            ← linear regression model│   ├── runner.js             ← spawns predict.py as child process│   └── requirements.txt      ← Python dependencies│├── public/│   └── index.html            ← frontend UI│└── tests/├── js/│   ├── runner.test.js    ← Jest tests for Node/Python bridge│   └── analyze.test.js   ← Jest tests for Express route└── python/└── test_predict.py   ← pytest tests for ML pipeline
+stock-analyzer/
+├── server.js                 ← Express entry point
+├── package.json
+├── .env.example              ← copy to .env and fill in keys
+├── routes/  
+│   └── analyze.js            ← POST /api/analyze route handler
+│    
+├── agent/   
+│   └── n8nClient.js          ← sends ML result to n8n webhook
+│
+├── ml/ 
+│   └── predict.py            ← linear regression model
+│   ├── runner.js             ← spawns predict.py as child process
+│   └── requirements.txt      ← Python dependencies
+│
+└── public/
+    └── index.html            ← frontend UI
 ---
 
 ## Setup
