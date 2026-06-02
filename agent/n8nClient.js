@@ -5,34 +5,17 @@
 //   1. Send the ML results to your n8n webhook URL
 //   2. Wait for n8n to finish its agentic workflow
 //   3. Return the AI summary back to the route handler
-//
-// This pattern is called "delegating to an external orchestrator."
-// Your Express app stays lean — it doesn't need to know anything
-// about Groq, prompts, or news fetching. n8n owns all of that.
-// -----------------------------------------------
 
-// TODO: Import axios for making HTTP requests
-// HINT: const axios = require('axios')
 const axios = require('axios')
 // axios: HTTP client for Node.js
-
-
 
 // callN8nAgent(ticker, mlResult)
 // Sends a POST request to your n8n webhook with the ticker
 // and ML model results. Waits for n8n to respond with the
 // Groq agent summary, then returns it as a string.
-//
-// IMPORTANT: Your n8n workflow must use a "Respond to Webhook"
-// node at the end — otherwise this call will hang and time out.
-// "Respond to Webhook" is what sends the response back here.
-
 
 module.exports = { callN8nAgent }
 
-
-
-// ticker: ticker, ml_output: mlResult
 async function callN8nAgent(ticker, mlResult) {
 
       try {
