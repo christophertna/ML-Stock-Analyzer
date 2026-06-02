@@ -62,19 +62,12 @@ stock-analyzer/
     └── index.html            ← frontend UI
 ```
 
-## Setup
+## Setup Steps
 
-### 1. Clone the repo
-```bash
-git clone [https://github.com/YOUR_USERNAME/stock-analyzer.git](https://github.com/YOUR_USERNAME/stock-analyzer.git)
-cd stock-analyzer
-2. Install Node.js dependenciesBashnpm install
-3. Install Python dependenciesBashpip install -r ml/requirements.txt
-4. Configure environment variablesBashcp .env.example .env
-Fill in .env:PORT=3000
-N8N_WEBHOOK_URL=http://localhost:5678/webhook-test/stock-analysis
-5. Set up n8n (self-hosted via Docker)Bashdocker run -it --rm --name n8n -p 5678:5678 n8nio/n8n
-Build the workflow in n8n:Webhook node → POST, path: stock-analysis, response mode: Using Respond to Webhook nodeCode node → fetches NewsAPI, Finnhub, Alpha Vantage, SEC-API in parallel and builds the agent promptAI Agent node → Groq LLaMA 3.3 70B, Conversation Agent, no toolsRespond to Webhook node → returns { "summary": "..." }6. Run the appBashnpm run dev
-Visit: http://localhost:3000Running TestsJavaScript (Jest):Bashnpm test
-Python (pytest):Bashpytest tests/python
-All tests use mocks — no API tokens are consumed during testing.n8n Agent LogicThe agent receives pre-fetched data from 4 sources and evaluates the ML prediction sequentially:SEC-API — checks for bankruptcy or legal collapse in recent 8-K filingsAlpha Vantage — checks P/E ratio and profit margins against the growth predictionFinnhub — evaluates market sentiment and current quote dataNewsAPI — scans recent English-language headlines for adverse eventsIf any source triggers a critical signal the agent stops early and reports the risk. Otherwise it synthesizes all evidence into a final Plausibility Rating (High / Medium / Low).Key ML Concepts UsedConceptWhereSupervised learningLinear regression on closing priceFeature engineeringMA5, MA20, Lag1-3, volatility, volume MATime-series train/test splitshuffle=False to prevent data leakageMAE + R² evaluationModel confidence metrics shown in UIRAG-style LLM groundingReal-time data injected into agent promptDisclaimerThis tool is for educational purposes only. All predictions and AI-generated analysis are not financial advice. Always consult a qualified financial advisor before making investment decisions.
+1. `git clone https://github.com/YOUR_USERNAME/stock-analyzer.git` and `cd stock-analyzer`
+2. `npm install`
+3. `pip install -r ml/requirements.txt`
+4. Copy `.env.example` to `.env` and fill in your variables (`PORT`, `N8N_WEBHOOK_URL`)
+5. Run `docker run -it --rm --name n8n -p 5678:5678 n8nio/n8n` to start n8n
+6. Build your n8n workflow (Webhook → Code → AI Agent → Respond to Webhook)
+7. `npm run dev`
