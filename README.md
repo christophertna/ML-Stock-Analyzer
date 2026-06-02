@@ -34,7 +34,7 @@ n8n Workflow
 |---|---|
 | ML model | Python · scikit-learn · yfinance · pandas |
 | Backend | Node.js · Express |
-| Agent orchestration | n8n (self-hosted) |
+| Agent orchestration | n8n (self-hosted with Docker) |
 | LLM | Groq · LLaMA 3.3 70B Versatile |
 | Data sources | NewsAPI · Finnhub · Alpha Vantage · SEC-API |
 | Frontend | Vanilla JS · Chart.js · Inter font |
