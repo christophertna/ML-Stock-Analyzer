@@ -16,7 +16,7 @@ Enter a stock ticker and the app:
 ---
 
 ## Architecture
-
+```
 Browser (vanilla JS + Chart.js)
     ↓ 
 POST /api/analyzeExpress (Node.js)
@@ -27,8 +27,7 @@ n8n Workflow
 ├── Code node  →  fetches NewsAPI, Finnhub, Alpha Vantage, SEC-API in parallel
 └── AI Agent   →  Groq LLaMA 3.3 reasons over all data
     ↓  Respond to WebhookExpress  →  { ml, summary }  →  Browser
----
-
+```
 ## Tech Stack
 
 | Layer | Technology |
@@ -43,7 +42,7 @@ n8n Workflow
 ---
 
 ## Project Structure
-
+```
 stock-analyzer/
 ├── server.js                 ← Express entry point
 ├── package.json
@@ -61,7 +60,7 @@ stock-analyzer/
 │
 └── public/
     └── index.html            ← frontend UI
----
+```
 
 ## Setup
 
