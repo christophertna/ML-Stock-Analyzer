@@ -299,10 +299,6 @@
 
     <!-- Price Chart -->
     <div class="chart-container">
-      <!--
-        A <canvas> element is an HTML drawing surface.
-        Chart.js takes control of it and draws the chart inside.
-      -->
       <canvas id="price-chart" height="100"></canvas>
     </div>
 
@@ -323,8 +319,8 @@
   <script>
     // FRONTEND JAVASCRIPT
     // script runs in the browser (not Node.js)
-    // It handles user interactions and updates the page without reloading.
-    // This pattern is called a "Single Page Application" (SPA) approach.
+    // Handles user interactions and updates the page without reloading
+    // "Single Page Application" (SPA) approach.
 
     // Grab references to all your DOM elements by their ids
     const tickerInput = document.getElementById('ticker-input')
@@ -409,7 +405,6 @@
 
     // Chart.js datasets use 'null' to represent
     // missing data points, which creates visual gaps in the line.
-    // This is how we show the prediction as a separate point.
 
     // Populate all the metric cards, chart, agent summary, weights
     function renderResults(data) {
