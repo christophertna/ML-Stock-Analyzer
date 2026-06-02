@@ -1,6 +1,6 @@
 # 📈 Stock Analyzer
 
-ML stock analysis pipeline combining a **linear regression price prediction model** with a **RAG-style Groq LLaMA 3.3 agent**, orchestrated through n8n and served via a Node.js/Express backend.
+ML stock analysis pipeline combining a **linear regression price prediction model** with a **Groq LLaMA 3.3 agent**, orchestrated through n8n and served via a Node.js/Express backend.
 
 ---
 
