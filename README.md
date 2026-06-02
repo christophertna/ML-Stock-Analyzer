@@ -76,6 +76,7 @@ stock-analyzer/
 ## n8n Workflow
 <img width="1085" height="446" alt="n8n workflow sc" src="https://github.com/user-attachments/assets/c1db10b6-9077-435f-9f3a-94e37ccea590" />
 <br>
+The secondary Code Node is not necessary, but was kept from debugging issues
 
 ## In Action
 <img width="1904" height="907" alt="Stock Analyzer 1" src="https://github.com/user-attachments/assets/5979f079-f2b0-43c8-bb39-3c628ac99dad" />
