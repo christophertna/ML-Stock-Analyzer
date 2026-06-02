@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Analyzer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #f5f7fa;
+      --surface:   #ffffff;
+      --border:    #e2e8f0;
+      --border2:   #cbd5e1;
+      --accent:    #2563eb;
+      --accent2:   #7c3aed;
+      --accent-lt: #eff6ff;
+      --text:      #0f172a;
+      --muted:     #64748b;
+      --subtle:    #94a3b8;
+      --positive:  #059669;
+      --negative:  #dc2626;
+      --pos-lt:    #ecfdf5;
+      --neg-lt:    #fef2f2;
+      --radius:    12px;
+      --font-mono: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 2.5rem 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: var(--text);
+    }
+
+    header h1 span {
+      color: var(--accent);
+    }
+
+    header p {
+      color: var(--muted);
+      margin-top: 0.35rem;
+      font-size: 0.875rem;
+      font-weight: 400;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 0.625rem;
+      max-width: 460px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .search-bar input {
+      flex: 1;
+      background: var(--surface);
+      border: 1.5px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 1rem;
+      font-family: var(--font-mono);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
+
+    .search-bar input::placeholder {
+      color: var(--subtle);
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+
+    .search-bar button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.75rem 1.5rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .search-bar button:hover   { background: #1d4ed8; transform: translateY(-1px); }
+    .search-bar button:active  { transform: translateY(0); }
+    .search-bar button:disabled { background: var(--border2); color: var(--subtle); cursor: not-allowed; transform: none; }
+
+    .results { display: none; max-width: 900px; margin: 0 auto; }
+    .results.visible { display: block; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.875rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .metric-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 12px rgba(37,99,235,0.08);
+    }
+
+    .metric-card .label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+    }
+
+    .metric-card .value {
+      font-size: 1.35rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .value.up      { color: var(--positive); }
+    .value.down    { color: var(--negative); }
+    .value.neutral { color: var(--accent); }
+
+    .chart-container {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .agent-summary {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      border-top: 3px solid var(--accent2);
+    }
+
+    .agent-summary h3 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .agent-summary p {
+      line-height: 1.8;
+      color: var(--text);
+      font-size: 0.925rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .agent-summary strong {
+      color: var(--accent2);
+      font-weight: 600;
+    }
+
+    .agent-summary em {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .weights-section {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .weights-section h3 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.875rem;
+    }
+
+    .weights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .weight-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.875rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.825rem;
+      transition: border-color 0.15s;
+    }
+
+    .weight-item:hover { border-color: var(--accent); }
+    .weight-item .w-name { color: var(--muted); font-weight: 500; }
+    .weight-item .w-val  { color: var(--accent); font-family: var(--font-mono); font-weight: 600; font-size: 0.8rem; }
+
+    .status {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: none;
+    }
+    .status.visible { display: block; }
+    .status.error   { color: var(--negative); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Stock <span>Analyzer</span></h1>
+    <p>Linear regression prediction · AI agent summary</p>
+  </header>
+
+  <!-- Search Input -->
+  <div class="search-bar">
+    <input id="ticker-input"
+      type="text"
+      placeholder="AAPL, TSLA, MSFT..."
+      maxlength="10"
+    />
+    <button id="analyze-btn">Analyze</button>
+  </div>
+
+  <!-- Loading / Error status message -->
+  <div id="status" class="status">Loading...</div>
+
+  <!-- Results Section (hidden until data loads) -->
+  <div id="results" class="results">
+
+    <!-- Metric Cards -->
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="label">Ticker</div>
+        <div id="val-ticker" class="value neutral">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Current Price</div>
+        <div id="val-current" class="value neutral">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Predicted Price</div>
+        <div id="val-predicted" class="value neutral">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Expected Change</div>
+        <div id="val-change" class="value neutral">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Model MAE</div>
+        <div id="val-mae" class="value neutral">—</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">R² Score</div>
+        <div id="val-r2" class="value neutral">—</div>
+      </div>
+    </div>
+
+    <!-- Price Chart -->
+    <div class="chart-container">
+      <!--
+        A <canvas> element is an HTML drawing surface.
+        Chart.js takes control of it and draws the chart inside.
+      -->
+      <canvas id="price-chart" height="100"></canvas>
+    </div>
+
+    <!-- Groq AI Agent Summary -->
+    <div class="agent-summary">
+      <h3>⚡ Llama 3.3 Agent Analysis</h3>
+      <p id="agent-text">—</p>
+    </div>
+
+    <!-- Feature Weights -->
+    <div class="weights-section">
+      <h3>Model Feature Weights</h3>
+      <div id="weights-grid" class="weights-grid"></div>
+    </div>
+
+  </div><!-- end .results -->
+
+  <script>
+    // FRONTEND JAVASCRIPT
+    // script runs in the browser (not Node.js)
+    // It handles user interactions and updates the page without reloading.
+    // This pattern is called a "Single Page Application" (SPA) approach.
+
+    // Grab references to all your DOM elements by their ids
+    const tickerInput = document.getElementById('ticker-input')
+    const analyzeBtn  = document.getElementById('analyze-btn')
+    const statusDiv   = document.getElementById('status')
+    const resultsDiv  = document.getElementById('results')
+    const agentText   = document.getElementById('agent-text')
+    const weightsGrid = document.getElementById('weights-grid')
+    const priceChart  = document.getElementById('price-chart')
+
+    // The DOM (Document Object Model): browser's live representation of the HTML
+    // JavaScript manipulates it to change what the user sees without reloading the page
+
+    // Keep a reference to the Chart.js instance so you can destroy
+    // and recreate it on each new search (otherwise charts stack up)
+    let chartInstance = null
+
+    // Helper that shows the status div with a message
+    function showStatus(message, isError = false) {
+      statusDiv.textContent = message
+      statusDiv.className = 'status visible' + (isError ? ' error' : '')
+      resultsDiv.classList.remove('visible')
+    }
+
+    // Chart rendering function using Chart.js
+    function renderChart(dates, prices, predictedPrice) {
+
+      if (chartInstance) chartInstance.destroy() // clear previous chart before creating a new one (avoid stacking)
+
+      chartInstance = new Chart(priceChart, {
+        type: 'line',
+        data: {
+          labels: [...dates, 'Predicted'],
+          datasets: [{
+            label: 'Close Price',
+            data: [...prices, null],
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37,99,235,0.06)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+            borderWidth: 2
+          }, {
+            label: 'Prediction',
+            data: [...new Array(prices.length).fill(null), predictedPrice],
+            borderColor: '#7c3aed',
+            pointRadius: 9,
+            pointHoverRadius: 11,
+            pointStyle: 'star',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: '#0f172a', font: { family: 'Inter', size: 12, weight: '500' } } },
+            tooltip: {
+              backgroundColor: '#fff',
+              titleColor: '#0f172a',
+              bodyColor: '#64748b',
+              borderColor: '#e2e8f0',
+              borderWidth: 1,
+              padding: 10,
+              titleFont: { family: 'Inter', weight: '600' },
+              bodyFont: { family: 'Inter' }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 }, maxTicksLimit: 10 },
+              grid: { color: 'rgba(226,232,240,0.8)' }
+            },
+            y: {
+              ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } },
+              grid: { color: 'rgba(226,232,240,0.8)' }
+            }
+          }
+        }
+      })
+    }
+
+    // Chart.js datasets use 'null' to represent
+    // missing data points, which creates visual gaps in the line.
+    // This is how we show the prediction as a separate point.
+
+    // Populate all the metric cards, chart, agent summary, weights
+    function renderResults(data) {
+
+      const { ml, summary } = data
+
+      console.log('data received:', JSON.stringify(data))
+
+      const change    = ml.predicted_price - ml.current_price
+      const changePct = ((change / ml.current_price) * 100).toFixed(2)
+      const isUp      = change >= 0
+
+      // Populate metric cards by id
+      document.getElementById('val-ticker').textContent    = ml.ticker
+      document.getElementById('val-current').textContent   = '$' + ml.current_price
+      document.getElementById('val-predicted').textContent = '$' + ml.predicted_price
+      document.getElementById('val-change').textContent    = (isUp ? '+' : '') + changePct + '%'
+      document.getElementById('val-change').className      = 'value ' + (isUp ? 'up' : 'down')
+      document.getElementById('val-mae').textContent       = '$' + ml.mae
+      document.getElementById('val-r2').textContent        = ml.r2
+
+      renderChart(ml.historical_dates, ml.historical_prices, ml.predicted_price)
+
+      // return and format the agent's summary
+      const formatted = (summary && summary.trim()) ? summary : 'No summary returned from agent.'
+
+      // Convert markdown to basic HTML
+      const html = formatted
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // **bold**
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')              // *italic*
+        .replace(/\n\n/g, '</p><p>')                       // double newline = paragraph
+        .replace(/\n/g, '<br>')                            // single newline = line break
+        .replace(/^/, '<p>')                               // wrap start
+        .replace(/$/, '</p>')                              // wrap end
+
+      agentText.innerHTML = html
+
+      // build feature weights dynamically
+      weightsGrid.innerHTML = Object.entries(ml.feature_weights).map(([name, val]) => `
+        <div class="weight-item">
+          <span class="w-name">${name}</span>
+          <span class="w-val">${val.toFixed(4)}</span>
+        </div>`).join('')
+
+      statusDiv.className = 'status'      // hide status
+      resultsDiv.classList.add('visible') // show results
+    }
+
+    // main handler
+    async function analyze() {
+
+      // get user input of ticker symbol
+      const ticker = tickerInput.value.trim().toUpperCase()
+
+      // validate
+      if (!ticker) return
+
+      analyzeBtn.disabled = true
+      showStatus('Running model for ' + ticker + '...')
+
+      try {
+
+        // fetch
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticker })
+        })
+
+        // get the response
+        const data = await response.json()
+
+        // validate
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'Analysis failed...')
+        }
+
+        // render the data
+        renderResults(data)
+
+      } catch (err) {
+
+        showStatus('Error: ' + err.message, true)
+
+      } finally {
+
+        analyzeBtn.disabled = false
+      }
+    }
+
+    // Event Listeners:
+
+    // Click handler to the analyze button
+    analyzeBtn.addEventListener('click', analyze)
+
+    // Also trigger analysis when Enter is pressed in the input
+    tickerInput.addEventListener('keydown', (e) => {
+      // (e): callback function that runs when the event occurs
+      if (e.key === 'Enter') analyze()
+    })
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Never commit these to git
+
+# Environment variables (contains API keys!)
+.env
+
+# Node.js installed packages
+node_modules/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS system files
+.DS_Store

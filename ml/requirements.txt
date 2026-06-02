@@ -1,0 +1,8 @@
+# Python Dependencies 
+
+# lists all external libraries that the code needs
+
+yfinance>=0.2.36
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
