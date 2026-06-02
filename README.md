@@ -1,4 +1,4 @@
-# Stock Analyzer
+# 📈 Stock Analyzer
 
 ML stock analysis pipeline combining a **linear regression price prediction model** with a **RAG-style Groq LLaMA 3.3 agent**, orchestrated through n8n and served via a Node.js/Express backend.
 
@@ -26,7 +26,8 @@ Python predict.py  →  linear regression result (JSON)
 n8n Workflow
 ├── Code node  →  fetches NewsAPI, Finnhub, Alpha Vantage, SEC-API in parallel
 └── AI Agent   →  Groq LLaMA 3.3 reasons over all data
-    ↓  Respond to WebhookExpress  →  { ml, summary }  →  Browser
+    ↓  Respond to Webhook
+Express  →  { ml, summary }  →  Browser
 ```
 ## Tech Stack
 
@@ -71,3 +72,15 @@ stock-analyzer/
 5. Run `docker run -it --rm --name n8n -p 5678:5678 n8nio/n8n` to start n8n
 6. Build your n8n workflow (Webhook → Code → AI Agent → Respond to Webhook)
 7. `npm run dev`
+
+## n8n Workflow
+<img width="1085" height="446" alt="n8n workflow sc" src="https://github.com/user-attachments/assets/c1db10b6-9077-435f-9f3a-94e37ccea590" />
+<br>
+
+## In Action
+<img width="1904" height="907" alt="Stock Analyzer 1" src="https://github.com/user-attachments/assets/5979f079-f2b0-43c8-bb39-3c628ac99dad" />
+<br>
+<img width="1906" height="909" alt="Stock Analyzer 2" src="https://github.com/user-attachments/assets/22bc936b-c1a0-41a7-b5ba-023dbe857f39" />
+
+
+
