@@ -80,7 +80,6 @@ The secondary Code Node is not necessary, but was kept from debugging issues
 
 ## In Action
 <img width="1904" height="907" alt="Stock Analyzer 1" src="https://github.com/user-attachments/assets/5979f079-f2b0-43c8-bb39-3c628ac99dad" />
-<br>
 <img width="1906" height="909" alt="Stock Analyzer 2" src="https://github.com/user-attachments/assets/22bc936b-c1a0-41a7-b5ba-023dbe857f39" />
 
 
