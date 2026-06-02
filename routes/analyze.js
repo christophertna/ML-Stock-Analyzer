@@ -1,4 +1,4 @@
-// routes/analyze.js — API Route Handlers
+// routes/analyze.js (API Route Handlers)
 
 // Route handler: function that runs when a specific HTTP method + URL combination is matched
 
@@ -16,16 +16,14 @@ const router = express.Router()
 const { runPythonModel } = require('../ml/runner')
 const { callN8nAgent } = require('../agent/N8nClient')
 
-// Note: we now import callN8nAgent instead of getGroqSummary.
-// The route handler below doesn't need to change much — we just
-// swap one function call for another. This is the benefit of
-// keeping each file focused on one job ("separation of concerns").
+// The route handler below doesn't need to change much, just
+// swap one function call for another
 
-// -----------------------------------------------
+
 // POST /api/analyze
-// -----------------------------------------------
-// This is the main endpoint. The frontend POSTs a ticker symbol,
+// main endpoint. The frontend POSTs a ticker symbol,
 // and this handler coordinates the two async steps:
+
 //   1. Run the Python ML model
 //   2. Send results to n8n, get the Groq agent summary back
 
