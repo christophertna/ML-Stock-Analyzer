@@ -18,8 +18,8 @@ Enter a stock ticker and the app:
 ## Architecture
 ```
 Browser (vanilla JS + Chart.js)
-    ↓ 
-POST /api/analyzeExpress (Node.js)
+    ↓ POST /api/analyze
+Express (Node.js)
     ↓  child_process
 Python predict.py  →  linear regression result (JSON)
     ↓  POST to webhook
