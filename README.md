@@ -65,13 +65,13 @@ stock-analyzer/
 
 ## Setup Steps
 
-1. `git clone https://github.com/christophertna/ML-Stock-Analyzer.git` and `cd ML-Stock-Analyzer`
-2. `npm install`
-3. `pip install -r ml/requirements.txt`
-4. Copy `.env.example` to `.env` and fill in your variables (`PORT`, `N8N_WEBHOOK_URL`)
-5. Run `docker run -it --rm --name n8n -p 5678:5678 n8nio/n8n` to start n8n
+1. ```git clone https://github.com/christophertna/ML-Stock-Analyzer.git``` and ```cd ML-Stock-Analyzer```
+2. ```npm install```
+3. ```pip install -r ml/requirements.txt```
+4. Copy ```.env.example``` to ```.env``` and fill in your variables (`PORT`, `N8N_WEBHOOK_URL`)
+5. Run ```docker run -it --rm --name n8n -p 5678:5678 n8nio/n8n``` to start n8n
 6. Build your n8n workflow (Webhook → Code → AI Agent → Respond to Webhook)
-7. `npm run dev`
+7. ```npm run dev```
 
 ## n8n Workflow
 <img width="1085" height="446" alt="n8n workflow sc" src="https://github.com/user-attachments/assets/c1db10b6-9077-435f-9f3a-94e37ccea590" />
