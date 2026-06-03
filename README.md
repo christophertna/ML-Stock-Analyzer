@@ -65,7 +65,7 @@ stock-analyzer/
 
 ## Setup Steps
 
-1. `git clone https://github.com/YOUR_USERNAME/stock-analyzer.git` and `cd stock-analyzer`
+1. `git clone https://github.com/YOUR_USERNAME/ML-Stock-Analyzer.git` and `cd ML-Stock-Analyzer`
 2. `npm install`
 3. `pip install -r ml/requirements.txt`
 4. Copy `.env.example` to `.env` and fill in your variables (`PORT`, `N8N_WEBHOOK_URL`)
