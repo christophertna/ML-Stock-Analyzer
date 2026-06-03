@@ -38,7 +38,7 @@ Express  →  { ml, summary }  →  Browser
 | Agent orchestration | n8n (self-hosted with Docker) |
 | LLM | Groq · LLaMA 3.3 70B Versatile |
 | Data sources | NewsAPI · Finnhub · Alpha Vantage · SEC-API |
-| Frontend | Vanilla JS · Chart.js · Inter font |
+| Frontend | Vanilla JS · Chart.js |
 
 ---
 
