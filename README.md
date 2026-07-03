@@ -40,6 +40,8 @@ Express  →  { ml, summary }  →  Browser
 | Data sources | NewsAPI · Finnhub · Alpha Vantage · SEC-API |
 | Frontend | Vanilla JS · Chart.js |
 
+Note: The Llama 3.3 70B Versatile model will be decomissioned by Groq on August 16 2026, so swapping the Llama 3.3 70B model with another similar model would be the best course of action
+
 ---
 
 ## Project Structure
